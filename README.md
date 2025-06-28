@@ -1,97 +1,291 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🚀 Setup Instructions
+This guide walks you through setting up the **MyKisan React Native project**, installing dependencies, and handling common issues.
 
-# Getting Started
+---
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
-
-## Step 1: Start Metro
-
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
+## 📌 1️⃣ Create a New React Native Project
+To set up the project, run the following command:
 
 ```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+npx @react-native-community/cli init ProjectName
 ```
 
-## Step 2: Build and run your app
+This will initialize a new React Native project named **ProjectName**.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+Once the installation is complete, navigate into the project directory:
 
 ```sh
-# Using npm
+cd ProjectName
+```
+
+Then, start the development server and launch the app on an Android device or emulator:
+
+```sh
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
+---
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+## 🔹 Troubleshooting Build Failures
+If the build fails, try cleaning the Gradle cache and rebuilding the project:
 
 ```sh
-bundle install
+cd android && gradlew clean
 ```
 
-Then, and every time you update your native dependencies, run:
+After cleaning, go back to the main project directory and rerun the build:
 
 ```sh
-bundle exec pod install
+cd ..
+npm run android
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+---
+
+## 🔹 Ensure Node.js and npm Are Up to Date
+Before proceeding, make sure that both **Node.js** and **npm** are up to date, as outdated versions may cause compatibility issues.
+
+---
+
+# 🔥 Firebase Integration Guide
+
+## 📌 1️⃣ Create a Firebase Project
+Before integrating **Firebase** into your React Native app, you need to set up a Firebase project:
+
+1. Go to [Firebase Console](https://console.firebase.google.com/).
+2. Click on **"Create a Project"** and follow the on-screen instructions.
+3. Once the project is created, navigate to **Project Settings** and select the **General** tab.
+
+---
+
+## 📌 2️⃣ Add Firebase to Your Android App
+1. In **Project Settings**, scroll down to **"Your apps"** and click **"Add App" → Select Android**.
+2. Enter your **Android package name** (you can find it in `android/app/src/main/AndroidManifest.xml`).
+3. Download the `google-services.json` file and move it into:
 
 ```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+android/app/
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+4. Click **Next** until setup is complete.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+---
 
-## Step 3: Modify your app
+## 📌 3️⃣ Install Firebase Dependencies
+To install Firebase in **React Native**, run:
 
-Now that you have successfully run the app, let's make changes!
+```sh
+npm install @react-native-firebase/app
+```
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+This package provides Firebase core functionality, required for any Firebase service (**Authentication, Firestore, etc.**).
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+---
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## 📌 4️⃣ Configure Firebase in Android Project
+After installing Firebase, some changes are required in your Gradle files.
 
-## Congratulations! :tada:
+### 🔹 Modify `/android/build.gradle`
+Open the file:
 
-You've successfully run and modified your React Native App. :partying_face:
+```sh
+android/build.gradle
+```
 
-### Now what?
+Inside the dependencies section, add:
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+```gradle
+classpath 'com.google.gms:google-services:4.4.2'
+```
 
-# Troubleshooting
+### 🔹 Modify `/android/app/build.gradle`
+Open the file:
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+```sh
+android/app/build.gradle
+```
 
-# Learn More
+At the bottom of the file, add:
 
-To learn more about React Native, take a look at the following resources:
+```gradle
+apply plugin: 'com.google.gms.google-services'
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+---
+
+## 📌 5️⃣ Sync and Rebuild the Project
+After making these changes, run the following command to apply the configuration:
+
+```sh
+npm run android
+```
+
+---
+
+# 📦 Install Required Libraries
+
+## 📌 Install React Native Vector Icons
+React Native Vector Icons provides a set of customizable icons for use in your app.
+
+To install it, run:
+
+```sh
+npm install react-native-vector-icons
+```
+
+### ⚠ Fix: Icons Not Displaying Correctly on Android
+If the icons are not appearing as expected, you may need to manually link the fonts in your Android project:
+
+1. Open the file:
+
+```sh
+android/app/build.gradle
+```
+
+2. Add the following line at the bottom of the file:
+
+```gradle
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+```
+
+3. Rebuild the project:
+
+```sh
+npm run android
+```
+
+---
+
+## 📌 Install React Navigation (For Screen Transitions)
+React Navigation is used for handling navigation between screens in React Native apps.
+
+### 🔹 Step 1: Install Core Navigation Package
+Run the following command to install the core navigation package:
+
+```sh
+npm install @react-navigation/native
+```
+
+### 🔹 Step 2: Install Required Dependencies
+React Navigation requires additional dependencies to work properly:
+
+```sh
+npm install react-native-screens react-native-safe-area-context react-native-gesture-handler react-native-reanimated react-native-vector-icons
+```
+
+### 🔹 Step 3: Install Stack Navigation (For Screen-Based Navigation)
+To enable stack-based navigation, install:
+
+```sh
+npm install @react-navigation/native-stack
+```
+
+---
+
+## 📌 Install AsyncStorage (For Persistent Data Storage)
+AsyncStorage allows you to store small amounts of persistent data, such as user sessions and preferences.
+
+To install it, run:
+
+```sh
+npm install @react-native-async-storage/async-storage
+```
+
+---  
+
+## 📌 Install Firebase Authentication.
+Firebase Authentication module for React Native.
+
+To install it, run:
+
+```sh
+npm install @react-native-firebase/auth
+
+```
+--- 
+## 📌 Install Firebase Cloud Firestore
+Firebase Cloud Firestore database module for React Native.
+
+To install it, run:
+
+```sh
+npm install @react-native-firebase/firestore
+
+```
+--- 
+## 📌 Install react-native-paper
+Material Design UI component library for React Native.
+
+To install it, run:
+
+```sh
+npm install react-native-paper
+
+```
+--- 
+## 📌 Install react-native-safe-area-context
+Handles safe area insets on iOS and Android devices (e.g., notches).
+
+To install it, run:
+
+```sh
+npm install react-native-safe-area-context
+
+```
+--- 
+## 📌 Install react-native-community/datetimepicker
+Native date and time picker component for React Native.
+
+To install it, run:
+
+```sh
+npm install @react-native-community/datetimepicker
+
+```
+
+---
+
+# 🚀 How to Run the App
+Follow these steps to run the MyKisan React Native app on your device or emulator.
+
+## 📌 1️⃣ Start the Metro Bundler
+Navigate to the project folder and start the Metro bundler:
+
+```sh
+cd ProjectName
+npm start
+```
+
+This will start the development server.
+
+---
+
+## 📌 2️⃣ Run the App on Android
+To launch the app on an Android emulator or physical device, run:
+
+```sh
+npm run android
+```
+
+### 🔹 Troubleshooting Build Issues
+If the build fails, try cleaning the Gradle cache:
+
+```sh
+cd android && gradlew clean
+```
+
+Then return to the main project folder and run:
+
+```sh
+npm run android
+```
+
+Ensure your Android device or emulator is running and detected using:
+
+```sh
+adb devices
+```
+
+---
+
+✅ **App is Now Running!** 🎉  
