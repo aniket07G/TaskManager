@@ -1,5 +1,5 @@
 # 🚀 Setup Instructions
-This guide walks you through setting up the **MyKisan React Native project**, installing dependencies, and handling common issues.
+This guide walks you through setting up the **TaskManager React Native project**, installing dependencies, and handling common issues.
 
 ---
 
