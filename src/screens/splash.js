@@ -26,8 +26,8 @@ const Splash = ({ navigation }) => {
     }, [])
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={styles.textmai}>Know</Text>
-            <Text style={styles.textkisan}>News</Text>
+            <Text style={styles.textmai}>Task</Text>
+            <Text style={styles.textkisan}>Manager</Text>
         </View>
     )
 }
@@ -36,13 +36,15 @@ const styles = StyleSheet.create({
     textmai: {
         fontSize: windowWidth * 0.1,
         fontWeight: '600',
-        color: '#333333'
+        color: '#0056b3',
+        fontFamily: 'Poppins-SemiBold',
     },
     textkisan: {
+        marginTop: -windowWidth * 0.095,
         fontSize: windowWidth * 0.1,
         fontWeight: '600',
-        marginTop: -windowWidth * 0.05,
-        color: '#008000'
+        color: '#339af0',
+        fontFamily: 'Poppins-SemiBold',
     }
 })
 

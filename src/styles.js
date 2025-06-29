@@ -311,6 +311,12 @@ const TaskStyle = StyleSheet.create({
         borderTopRightRadius: windowWidth*1,
         borderBottomLeftRadius: windowWidth*1,
         gap: windowWidth*0.045
+    },
+    noTaskText: {
+        fontSize: windowWidth*0.06,
+        color: '#666666',
+        fontFamily: 'Poppins-Medium',
+        fontWeight: '500'
     }
 });
 

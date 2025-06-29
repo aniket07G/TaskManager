@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     },
     forUsername: {
         width: windowWidth * 0.85, // Responsive width
-        height: windowHight * 0.075,
+        height: windowHight * 0.071,
         borderWidth: 2,  // Required for visible border
         borderColor: 'black',
         borderRadius: 10,
@@ -118,33 +118,36 @@ const styles = StyleSheet.create({
         fontSize: windowWidth * 0.04,
         alignSelf: 'center',
         marginTop: windowHight * 0.03,
-        paddingLeft: windowWidth * 0.04
+        paddingLeft: windowWidth * 0.04,
+        fontFamily: "Roboto-Regular"
     },
     forPassword: {
         width: windowWidth * 0.85, // Responsive width
-        height: windowHight * 0.075,
+        height: windowHight * 0.071,
         borderWidth: 2,  // Required for visible border
         borderColor: 'black',
         borderRadius: 10,
         paddingHorizontal: 10,
         fontSize: windowWidth * 0.04,
         alignSelf: 'center',
-        paddingLeft: windowWidth * 0.04
+        paddingLeft: windowWidth * 0.04,
+        fontFamily: "Roboto-Regular"
     },
     forconfirmpassword: {
         width: windowWidth * 0.85, // Responsive width
-        height: windowHight * 0.075,
+        height: windowHight * 0.071,
         borderWidth: 2,  // Required for visible border
         borderColor: 'black',
         borderRadius: 10,
         paddingHorizontal: 10,
         fontSize: windowWidth * 0.04,
         alignSelf: 'center',
-        paddingLeft: windowWidth * 0.04
+        paddingLeft: windowWidth * 0.04,
+        fontFamily: "Roboto-Regular"
     },
     loginButton: {
         width: windowWidth * 0.85,
-        height: windowHight * 0.075,
+        height: windowHight * 0.073,
         backgroundColor: '#007bff',
         alignSelf: 'center',
         borderRadius: 10,
@@ -154,14 +157,16 @@ const styles = StyleSheet.create({
     buttonText: {
         color: 'white',
         fontSize: windowWidth * 0.06,
-        fontWeight: '500'
+        fontWeight: '500',
+        fontFamily: 'Poppins-Medium'
     },
     textRegistration: {
         alignSelf: 'center',
-        marginTop: windowHight * 0.152,
+        marginTop: windowHight * 0.18,
         fontSize: windowWidth * 0.07,
         fontWeight: '800',
-        color: '#007bff'
+        color: '#007bff',
+        fontFamily: 'Poppins-Bold'
     },
     errorContainer: {
         height: windowHight * 0.035,
@@ -172,7 +177,8 @@ const styles = StyleSheet.create({
         color: 'red',
         marginLeft: windowWidth * 0.02,
         fontSize: windowWidth * 0.03,
-        fontWeight: '400'
+        fontWeight: '400',
+        fontFamily: 'Roboto'
     }
 })
 

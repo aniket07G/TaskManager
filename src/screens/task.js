@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Dimensions, ScrollView, TouchableOpacity, FlatList, Modal, TextInput, Alert } from "react-native";
+import { View, Text, Dimensions, ScrollView, TouchableOpacity, FlatList, Modal, TextInput, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import styles from "../styles";
 import SearchIcon from "react-native-vector-icons/EvilIcons";
@@ -18,12 +18,8 @@ import MarkIcon from 'react-native-vector-icons/MaterialIcons';
 
 const windowWidth = Dimensions.get('window').width;
 const TaskStyle = styles.TaskStyle;
-
-
 const today = new Date();
 const formatted = today.toISOString().split('T')[0];
-const user = auth().currentUser;
-console.log("uid-> ", user.uid);
 
 
 let TasksGlobal = []
@@ -42,15 +38,13 @@ const Task = () => {
     const [showMore, setShowMore] = useState(false);
     const [morekey, setMoreKey] = useState("");
     const [doesComeFromEdit, setDoesComeFromEdit] = useState(null);
-
-    const insets = useSafeAreaInsets();
+    const [uid, setUid] = useState(null);
+    const [creatingLoading, setCreatingLoading] = useState(false);
+    const [firstLoading, setFirstLoading] = useState(true);
 
     const onDueDateChange = (event, selectedDate) => {
         setShowCalender(false);
-        console.log("checking");
-
         if (selectedDate) {
-            console.log("date", selectedDate.toLocaleDateString());
             setDueDate(selectedDate);
         } else {
             console.log("User canceled the date picker");
@@ -58,6 +52,7 @@ const Task = () => {
     };
 
     const handleCreate = async () => {
+        setCreatingLoading(true);
         try {
             if (taskTitle.trim() === "") throw new Error("Title is required");
             if (taskDiscription.trim() === "") throw new Error("Discription is required");
@@ -70,16 +65,16 @@ const Task = () => {
                 isComplete: false,
                 dueDate: dueDate.toISOString().split('T')[0],
             }
-            console.log(taskToBeSaved);
             if (doesComeFromEdit) {
                 await deleteTask(doesComeFromEdit);
             }
             TasksGlobal.push(taskToBeSaved);
+
             await firestore()
                 .collection('users_tasks')
-                .doc(user.uid)
+                .doc(uid)
                 .set({ tasks: TasksGlobal });
-            console.log("Saved");
+
             setVisible(false);
             setTimeout(() => {
                 sortBasedonToday(TasksGlobal);
@@ -93,6 +88,8 @@ const Task = () => {
             }, 0);
         } catch (e) {
             Alert.alert(e.message);
+        } finally {
+            setCreatingLoading(false);
         }
     }
 
@@ -117,14 +114,12 @@ const Task = () => {
         tomorrow.setDate(tomorrow.getDate() + 1);
         const tomorrowString = formatDate(tomorrow);
         const filteredByTomorrow = tasks.filter(task => task.dueDate === tomorrowString);
-        console.log("Tasks due tomorrow:", filteredByTomorrow);
         setTomorrowTasks(filteredByTomorrow);
     }
 
     const sortBasedonToday = (tasks) => {
         const todayDate = formatDate(false);
         const filteredByToday = tasks.filter(item => item.dueDate === todayDate);
-        console.log("filterByToday", filteredByToday);
         setTodayTasks(filteredByToday);
     }
 
@@ -150,7 +145,7 @@ const Task = () => {
         try {
             await firestore()
                 .collection('users_tasks')
-                .doc(user.uid)
+                .doc(uid)
                 .set({ tasks: TasksGlobal });
             console.log("Deleted");
             if (!doesComeFromEdit) {
@@ -182,9 +177,8 @@ const Task = () => {
             TasksGlobal.push(updatedTask);
             await firestore()
                 .collection('users_tasks')
-                .doc(user.uid)
+                .doc(uid)
                 .set({ tasks: TasksGlobal });
-            console.log("marked");
             setTimeout(() => {
                 sortBasedonToday(TasksGlobal);
                 sortBasedonTomorrow(TasksGlobal);
@@ -199,14 +193,9 @@ const Task = () => {
 
     const fetchTasks = async () => {
         try {
-            const user = auth().currentUser;
-            if (!user) {
-                console.log("No user logged in");
-                return;
-            }
             const docSnap = await firestore()
                 .collection('users_tasks')
-                .doc(user.uid)
+                .doc(uid)
                 .get();
 
             if (docSnap.exists && docSnap.data().tasks) {
@@ -220,12 +209,23 @@ const Task = () => {
             }
         } catch (e) {
             console.log(e);
+        } finally {
+            setFirstLoading(false);
         }
     }
 
     useEffect(() => {
-        fetchTasks();
-    }, [])
+        const user = auth().currentUser;
+        if (user && user.uid) {
+            setUid(user.uid);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (uid) {
+            fetchTasks();
+        }
+    }, [uid]);
 
     return (
         <SafeAreaView style={TaskStyle.conatiner}>
@@ -252,234 +252,252 @@ const Task = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                {todayTasks.length !== 0 &&
-                    <View style={TaskStyle.todayContainer}>
-                        <Text style={TaskStyle.todayTaskText}>Today Tasks</Text>
-                        <FlatList
-                            data={todayTasks}
-                            showsVerticalScrollIndicator={false}
-                            renderItem={({ item }) => (
-                                <View style={[TaskStyle.taskContainer, { opacity: item.isComplete ? 0.6 : 1 }]} >
-                                    <View style={TaskStyle.leftTaskC}>
-                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={"#4A90E2"} />
-                                    </View>
-                                    <View style={TaskStyle.middleTaskC}>
-                                        {showMore && item.id === morekey ? (
-                                            <>
-                                                <View style={TaskStyle.showMoreConainer}>
-                                                    <TouchableOpacity onPress={() => {
-                                                        setDoesComeFromEdit(null);
-                                                        deleteTask(item)
+                {firstLoading ? (
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <ActivityIndicator color={"#4A90E2"} size={50} />
+                    </View>
+                ) : (
+                    <>
+                        {!todayTasks.length && !tomorrowTasks.length && !filterTasks.length ? (
+                            <>
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                    <Text style={TaskStyle.noTaskText}>No Tasks Yet</Text>
+                                </View>
+                            </>
+                        ) : (
+                            <>
+                                {todayTasks.length !== 0 &&
+                                    <View style={TaskStyle.todayContainer}>
+                                        <Text style={TaskStyle.todayTaskText}>Today Tasks</Text>
+                                        <FlatList
+                                            data={todayTasks}
+                                            showsVerticalScrollIndicator={false}
+                                            renderItem={({ item }) => (
+                                                <View style={[TaskStyle.taskContainer, { opacity: item.isComplete ? 0.6 : 1 }]} >
+                                                    <View style={TaskStyle.leftTaskC}>
+                                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                    </View>
+                                                    <View style={TaskStyle.middleTaskC}>
+                                                        {showMore && item.id === morekey ? (
+                                                            <>
+                                                                <View style={TaskStyle.showMoreConainer}>
+                                                                    <TouchableOpacity onPress={() => {
+                                                                        setDoesComeFromEdit(null);
+                                                                        deleteTask(item)
+                                                                    }}>
+                                                                        <DeleteIcon name="delete-forever" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                    </TouchableOpacity>
+                                                                    <TouchableOpacity
+                                                                        disabled={item.isComplete}
+                                                                        onPress={() => editTask(item)}>
+                                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                    </TouchableOpacity>
+                                                                    <TouchableOpacity
+                                                                        disabled={item.isComplete}
+                                                                        onPress={() => {
+                                                                            setDoesComeFromEdit(item);
+                                                                            markTask(item);
+                                                                        }}>
+                                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                    </TouchableOpacity>
+                                                                </View>
+                                                            </>) : (
+                                                            <>
+                                                                <Text
+                                                                    style={TaskStyle.titleText}
+                                                                    numberOfLines={1}
+                                                                    ellipsizeMode="tail">
+                                                                    {item.title}
+                                                                </Text>
+                                                                <Text
+                                                                    style={TaskStyle.discriptionText}
+                                                                    numberOfLines={2}
+                                                                    ellipsizeMode="tail">
+                                                                    {item.description}
+                                                                </Text>
+                                                            </>
+                                                        )}
+                                                    </View>
+                                                    <View style={TaskStyle.rightTaskC}>
+                                                        <Text
+                                                            style={[TaskStyle.priorityText,
+                                                            item.priority === "high" ? { color: '#FF3B30' } : item.priority === "low" ? { color: "#34C759" } : { color: "#FF9500" }]}>
+                                                            {item.priority === "high" ? "H" : item.priority === "low" ? "L" : "M"}</Text>
+                                                        <Text style={TaskStyle.dueText}>{item.dueDate}</Text>
+                                                    </View>
+                                                    <TouchableOpacity style={TaskStyle.moreContainer} onPress={() => {
+                                                        if (!showMore) {
+                                                            setShowMore(true);
+                                                            setMoreKey(item.id);
+                                                        } else {
+                                                            setShowMore(false);
+                                                            setMoreKey("");
+                                                        }
                                                     }}>
-                                                        <DeleteIcon name="delete-forever" size={windowWidth * 0.08} color={"#4A90E2"} />
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity
-                                                        disabled={item.isComplete}
-                                                        onPress={() => editTask(item)}>
-                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={"#4A90E2"} />
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity
-                                                        disabled={item.isComplete}
-                                                        onPress={() => {
-                                                            setDoesComeFromEdit(item);
-                                                            markTask(item);
-                                                        }}>
-                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                        <MoreIcon name="dots-horizontal" size={windowWidth * 0.05} color={"#FFFFFF"} />
                                                     </TouchableOpacity>
                                                 </View>
-                                            </>) : (
-                                            <>
-                                                <Text
-                                                    style={TaskStyle.titleText}
-                                                    numberOfLines={1}
-                                                    ellipsizeMode="tail">
-                                                    {item.title}
-                                                </Text>
-                                                <Text
-                                                    style={TaskStyle.discriptionText}
-                                                    numberOfLines={2}
-                                                    ellipsizeMode="tail">
-                                                    {item.description}
-                                                </Text>
-                                            </>
-                                        )}
+                                            )}
+                                        />
                                     </View>
-                                    <View style={TaskStyle.rightTaskC}>
-                                        <Text
-                                            style={[TaskStyle.priorityText,
-                                            item.priority === "high" ? { color: '#FF3B30' } : item.priority === "low" ? { color: "#34C759" } : { color: "#FF9500" }]}>
-                                            {item.priority === "high" ? "H" : item.priority === "low" ? "L" : "M"}</Text>
-                                        <Text style={TaskStyle.dueText}>{item.dueDate}</Text>
-                                    </View>
-                                    <TouchableOpacity style={TaskStyle.moreContainer} onPress={() => {
-                                        if (!showMore) {
-                                            setShowMore(true);
-                                            setMoreKey(item.id);
-                                        } else {
-                                            setShowMore(false);
-                                            setMoreKey("");
-                                        }
-                                    }}>
-                                        <MoreIcon name="dots-horizontal" size={windowWidth * 0.05} color={"#FFFFFF"} />
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        />
-                    </View>
-                }
-                {tomorrowTasks.length !== 0 &&
-                    <View style={[TaskStyle.todayContainer, { paddingTop: 0 }]}>
-                        <Text style={TaskStyle.todayTaskText}>Tomorrow Tasks</Text>
-                        <FlatList
-                            data={tomorrowTasks}
-                            showsVerticalScrollIndicator={false}
-                            renderItem={({ item }) => (
-                                <View style={[TaskStyle.taskContainer, { opacity: item.isComplete ? 0.6 : 1 }]}>
-                                    <View style={TaskStyle.leftTaskC}>
-                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={"#4A90E2"} />
-                                    </View>
-                                    <View style={TaskStyle.middleTaskC}>
-                                        {showMore && item.id === morekey ? (
-                                            <>
-                                                <View style={TaskStyle.showMoreConainer}>
-                                                    <TouchableOpacity onPress={() => {
-                                                        setDoesComeFromEdit(null);
-                                                        deleteTask(item)
+                                }
+                                {tomorrowTasks.length !== 0 &&
+                                    <View style={[TaskStyle.todayContainer, { paddingTop: 0 }]}>
+                                        <Text style={TaskStyle.todayTaskText}>Tomorrow Tasks</Text>
+                                        <FlatList
+                                            data={tomorrowTasks}
+                                            showsVerticalScrollIndicator={false}
+                                            renderItem={({ item }) => (
+                                                <View style={[TaskStyle.taskContainer, { opacity: item.isComplete ? 0.6 : 1 }]}>
+                                                    <View style={TaskStyle.leftTaskC}>
+                                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                    </View>
+                                                    <View style={TaskStyle.middleTaskC}>
+                                                        {showMore && item.id === morekey ? (
+                                                            <>
+                                                                <View style={TaskStyle.showMoreConainer}>
+                                                                    <TouchableOpacity onPress={() => {
+                                                                        setDoesComeFromEdit(null);
+                                                                        deleteTask(item)
+                                                                    }}>
+                                                                        <DeleteIcon name="delete-forever" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                    </TouchableOpacity>
+                                                                    <TouchableOpacity
+                                                                        disabled={item.isComplete}
+                                                                        onPress={() => editTask(item)}>
+                                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                    </TouchableOpacity>
+                                                                    <TouchableOpacity
+                                                                        disabled={item.isComplete}
+                                                                        onPress={() => {
+                                                                            setDoesComeFromEdit(item);
+                                                                            markTask(item);
+                                                                        }}>
+                                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                    </TouchableOpacity>
+                                                                </View>
+                                                            </>) : (
+                                                            <>
+                                                                <Text
+                                                                    style={TaskStyle.titleText}
+                                                                    numberOfLines={1}
+                                                                    ellipsizeMode="tail">
+                                                                    {item.title}
+                                                                </Text>
+                                                                <Text
+                                                                    style={TaskStyle.discriptionText}
+                                                                    numberOfLines={2}
+                                                                    ellipsizeMode="tail">
+                                                                    {item.description}
+                                                                </Text>
+                                                            </>
+                                                        )}
+                                                    </View>
+                                                    <View style={TaskStyle.rightTaskC}>
+                                                        <Text
+                                                            style={[TaskStyle.priorityText,
+                                                            item.priority === "high" ? { color: '#FF3B30' } : item.priority === "low" ? { color: "#34C759" } : { color: "#FF9500" }]}>
+                                                            {item.priority === "high" ? "H" : item.priority === "low" ? "L" : "M"}</Text>
+                                                        <Text style={TaskStyle.dueText}>{item.dueDate}</Text>
+                                                    </View>
+                                                    <TouchableOpacity style={TaskStyle.moreContainer} onPress={() => {
+                                                        if (!showMore) {
+                                                            setShowMore(true);
+                                                            setMoreKey(item.id);
+                                                        } else {
+                                                            setShowMore(false);
+                                                            setMoreKey("");
+                                                        }
                                                     }}>
-                                                        <DeleteIcon name="delete-forever" size={windowWidth * 0.08} color={"#4A90E2"} />
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity
-                                                        disabled={item.isComplete}
-                                                        onPress={() => editTask(item)}>
-                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={"#4A90E2"} />
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity
-                                                        disabled={item.isComplete}
-                                                        onPress={() => {
-                                                            setDoesComeFromEdit(item);
-                                                            markTask(item);
-                                                        }}>
-                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                        <MoreIcon name="dots-horizontal" size={windowWidth * 0.05} color={"#FFFFFF"} />
                                                     </TouchableOpacity>
                                                 </View>
-                                            </>) : (
-                                            <>
-                                                <Text
-                                                    style={TaskStyle.titleText}
-                                                    numberOfLines={1}
-                                                    ellipsizeMode="tail">
-                                                    {item.title}
-                                                </Text>
-                                                <Text
-                                                    style={TaskStyle.discriptionText}
-                                                    numberOfLines={2}
-                                                    ellipsizeMode="tail">
-                                                    {item.description}
-                                                </Text>
-                                            </>
-                                        )}
+                                            )}
+                                        />
                                     </View>
-                                    <View style={TaskStyle.rightTaskC}>
-                                        <Text
-                                            style={[TaskStyle.priorityText,
-                                            item.priority === "high" ? { color: '#FF3B30' } : item.priority === "low" ? { color: "#34C759" } : { color: "#FF9500" }]}>
-                                            {item.priority === "high" ? "H" : item.priority === "low" ? "L" : "M"}</Text>
-                                        <Text style={TaskStyle.dueText}>{item.dueDate}</Text>
-                                    </View>
-                                    <TouchableOpacity style={TaskStyle.moreContainer} onPress={() => {
-                                        if (!showMore) {
-                                            setShowMore(true);
-                                            setMoreKey(item.id);
-                                        } else {
-                                            setShowMore(false);
-                                            setMoreKey("");
-                                        }
-                                    }}>
-                                        <MoreIcon name="dots-horizontal" size={windowWidth * 0.05} color={"#FFFFFF"} />
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        />
-                    </View>
-                }
-                {filterTasks &&
-                    <View style={[TaskStyle.basedonFilterContainer, { paddingTop: 0, paddingBottom: 0 }]}>
-                        <View style={TaskStyle.filterHeaderContainer}>
-                            <SearchIcon name="search" style={TaskStyle.searchIcon} size={windowWidth * 0.09} color={"#0D47A1"} />
-                            <Text style={TaskStyle.filterText}>{filterParameter.charAt(0).toUpperCase() + filterParameter.slice(1)}</Text>
-                        </View>
-                        <FlatList
-                            data={filterTasks}
-                            showsVerticalScrollIndicator={false}
-                            renderItem={({ item }) => (
-                                <View style={[TaskStyle.taskContainer, { opacity: item.isComplete ? 0.6 : 1 }]}>
-                                    <View style={TaskStyle.leftTaskC}>
-                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={"#4A90E2"} />
-                                    </View>
-                                    <View style={TaskStyle.middleTaskC}>
-                                        {showMore && item.id === morekey ? (
-                                            <>
-                                                <View style={TaskStyle.showMoreConainer}>
-                                                    <TouchableOpacity onPress={() => {
-                                                        setDoesComeFromEdit(null);
-                                                        deleteTask(item)
+                                }
+                                {filterTasks &&
+                                    <View style={[TaskStyle.basedonFilterContainer, { paddingTop: 0, paddingBottom: 0 }]}>
+                                        <View style={TaskStyle.filterHeaderContainer}>
+                                            <SearchIcon name="search" style={TaskStyle.searchIcon} size={windowWidth * 0.09} color={"#0D47A1"} />
+                                            <Text style={TaskStyle.filterText}>{filterParameter.charAt(0).toUpperCase() + filterParameter.slice(1)}</Text>
+                                        </View>
+                                        <FlatList
+                                            data={filterTasks}
+                                            showsVerticalScrollIndicator={false}
+                                            renderItem={({ item }) => (
+                                                <View style={[TaskStyle.taskContainer, { opacity: item.isComplete ? 0.6 : 1 }]}>
+                                                    <View style={TaskStyle.leftTaskC}>
+                                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                    </View>
+                                                    <View style={TaskStyle.middleTaskC}>
+                                                        {showMore && item.id === morekey ? (
+                                                            <>
+                                                                <View style={TaskStyle.showMoreConainer}>
+                                                                    <TouchableOpacity onPress={() => {
+                                                                        setDoesComeFromEdit(null);
+                                                                        deleteTask(item)
+                                                                    }}>
+                                                                        <DeleteIcon name="delete-forever" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                    </TouchableOpacity>
+                                                                    <TouchableOpacity
+                                                                        disabled={item.isComplete}
+                                                                        onPress={() => editTask(item)}>
+                                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                    </TouchableOpacity>
+                                                                    <TouchableOpacity
+                                                                        disabled={item.isComplete}
+                                                                        onPress={() => {
+                                                                            setDoesComeFromEdit(item);
+                                                                            markTask(item);
+                                                                        }}>
+                                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                    </TouchableOpacity>
+                                                                </View>
+                                                            </>) : (
+                                                            <>
+                                                                <Text
+                                                                    style={TaskStyle.titleText}
+                                                                    numberOfLines={1}
+                                                                    ellipsizeMode="tail">
+                                                                    {item.title}
+                                                                </Text>
+                                                                <Text
+                                                                    style={TaskStyle.discriptionText}
+                                                                    numberOfLines={2}
+                                                                    ellipsizeMode="tail">
+                                                                    {item.description}
+                                                                </Text>
+                                                            </>
+                                                        )}
+                                                    </View>
+                                                    <View style={TaskStyle.rightTaskC}>
+                                                        <Text
+                                                            style={[TaskStyle.priorityText,
+                                                            item.priority === "high" ? { color: '#FF3B30' } : item.priority === "low" ? { color: "#34C759" } : { color: "#FF9500" }]}>
+                                                            {item.priority === "high" ? "H" : item.priority === "low" ? "L" : "M"}</Text>
+                                                        <Text style={TaskStyle.dueText}>{item.dueDate}</Text>
+                                                    </View>
+                                                    <TouchableOpacity style={TaskStyle.moreContainer} onPress={() => {
+                                                        if (!showMore) {
+                                                            setShowMore(true);
+                                                            setMoreKey(item.id);
+                                                        } else {
+                                                            setShowMore(false);
+                                                            setMoreKey("");
+                                                        }
                                                     }}>
-                                                        <DeleteIcon name="delete-forever" size={windowWidth * 0.08} color={"#4A90E2"} />
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity
-                                                        disabled={item.isComplete}
-                                                        onPress={() => editTask(item)}>
-                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={"#4A90E2"} />
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity
-                                                        disabled={item.isComplete}
-                                                        onPress={() => {
-                                                            setDoesComeFromEdit(item);
-                                                            markTask(item);
-                                                        }}>
-                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                        <MoreIcon name="dots-horizontal" size={windowWidth * 0.05} color={"#FFFFFF"} />
                                                     </TouchableOpacity>
                                                 </View>
-                                            </>) : (
-                                            <>
-                                                <Text
-                                                    style={TaskStyle.titleText}
-                                                    numberOfLines={1}
-                                                    ellipsizeMode="tail">
-                                                    {item.title}
-                                                </Text>
-                                                <Text
-                                                    style={TaskStyle.discriptionText}
-                                                    numberOfLines={2}
-                                                    ellipsizeMode="tail">
-                                                    {item.description}
-                                                </Text>
-                                            </>
-                                        )}
+                                            )}
+                                        />
                                     </View>
-                                    <View style={TaskStyle.rightTaskC}>
-                                        <Text
-                                            style={[TaskStyle.priorityText,
-                                            item.priority === "high" ? { color: '#FF3B30' } : item.priority === "low" ? { color: "#34C759" } : { color: "#FF9500" }]}>
-                                            {item.priority === "high" ? "H" : item.priority === "low" ? "L" : "M"}</Text>
-                                        <Text style={TaskStyle.dueText}>{item.dueDate}</Text>
-                                    </View>
-                                    <TouchableOpacity style={TaskStyle.moreContainer} onPress={() => {
-                                        if (!showMore) {
-                                            setShowMore(true);
-                                            setMoreKey(item.id);
-                                        } else {
-                                            setShowMore(false);
-                                            setMoreKey("");
-                                        }
-                                    }}>
-                                        <MoreIcon name="dots-horizontal" size={windowWidth * 0.05} color={"#FFFFFF"} />
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        />
-                    </View>
-                }
+                                }
+                            </>
+                        )}
+                    </>
+                )}
                 <Modal
                     visible={visible}
                     animationType="fade"
@@ -487,71 +505,79 @@ const Task = () => {
                 >
                     <View style={TaskStyle.modalContainer}>
                         <View style={TaskStyle.mainDataModal}>
-                            <Text style={TaskStyle.titleTextModal}>Task Title</Text>
-                            <TextInput
-                                value={taskTitle}
-                                onChangeText={setTaskTitle}
-                                placeholder="Enter the task title"
-                                style={TaskStyle.titleInput}
-                            />
-                            <Text style={TaskStyle.discriptionTextModal}>Task Discription</Text>
-                            <TextInput
-                                value={taskDiscription}
-                                onChangeText={setTaskDiscription}
-                                placeholder="Enter the task discription"
-                                style={TaskStyle.discTitleInput}
-                                multiline={true}
-                                textAlignVertical="top"
-                                numberOfLines={5}
-                            />
-                            <View style={TaskStyle.radioContainer}>
-                                <Text style={TaskStyle.priorityTextModal}>Priority</Text>
-                                <Text style={[TaskStyle.LMHText, { marginLeft: windowWidth * 0.15 }]}>L</Text>
-                                <TouchableOpacity style={{ marginLeft: windowWidth * 0.008 }} onPress={() => setPriority("low")}>
-                                    <View style={TaskStyle.outerCircle}>
-                                        {priority == "low" ? <View style={[TaskStyle.innerCircle, { backgroundColor: '#34C759' }]}></View> : null}
+                            {creatingLoading ? (
+                                <>
+                                    <ActivityIndicator color={"#4A90E2"} size={50} />
+                                </>
+                            ) : (
+                                <>
+                                    <Text style={TaskStyle.titleTextModal}>Task Title</Text>
+                                    <TextInput
+                                        value={taskTitle}
+                                        onChangeText={setTaskTitle}
+                                        placeholder="Enter the task title"
+                                        style={TaskStyle.titleInput}
+                                    />
+                                    <Text style={TaskStyle.discriptionTextModal}>Task Discription</Text>
+                                    <TextInput
+                                        value={taskDiscription}
+                                        onChangeText={setTaskDiscription}
+                                        placeholder="Enter the task discription"
+                                        style={TaskStyle.discTitleInput}
+                                        multiline={true}
+                                        textAlignVertical="top"
+                                        numberOfLines={5}
+                                    />
+                                    <View style={TaskStyle.radioContainer}>
+                                        <Text style={TaskStyle.priorityTextModal}>Priority</Text>
+                                        <Text style={[TaskStyle.LMHText, { marginLeft: windowWidth * 0.15 }]}>L</Text>
+                                        <TouchableOpacity style={{ marginLeft: windowWidth * 0.008 }} onPress={() => setPriority("low")}>
+                                            <View style={TaskStyle.outerCircle}>
+                                                {priority == "low" ? <View style={[TaskStyle.innerCircle, { backgroundColor: '#34C759' }]}></View> : null}
+                                            </View>
+                                        </TouchableOpacity>
+                                        <Text style={[TaskStyle.LMHText, { marginLeft: windowWidth * 0.05 }]}>M</Text>
+                                        <TouchableOpacity style={{ marginLeft: windowWidth * 0.008 }} onPress={() => setPriority("medium")}>
+                                            <View style={TaskStyle.outerCircle}>
+                                                {priority == "medium" ? <View style={[TaskStyle.innerCircle, { backgroundColor: '#FF9500' }]}></View> : null}
+                                            </View>
+                                        </TouchableOpacity>
+                                        <Text style={[TaskStyle.LMHText, { marginLeft: windowWidth * 0.05 }]}>H</Text>
+                                        <TouchableOpacity style={{ marginLeft: windowWidth * 0.008 }} onPress={() => setPriority("high")}>
+                                            <View style={TaskStyle.outerCircle}>
+                                                {priority == "high" ? <View style={[TaskStyle.innerCircle, { backgroundColor: '#FF3B30' }]}></View> : null}
+                                            </View>
+                                        </TouchableOpacity>
                                     </View>
-                                </TouchableOpacity>
-                                <Text style={[TaskStyle.LMHText, { marginLeft: windowWidth * 0.05 }]}>M</Text>
-                                <TouchableOpacity style={{ marginLeft: windowWidth * 0.008 }} onPress={() => setPriority("medium")}>
-                                    <View style={TaskStyle.outerCircle}>
-                                        {priority == "medium" ? <View style={[TaskStyle.innerCircle, { backgroundColor: '#FF9500' }]}></View> : null}
+                                    <View style={TaskStyle.dueDateContainer}>
+                                        <Text style={TaskStyle.deadLineText}>DeadLine</Text>
+                                        <TouchableOpacity style={TaskStyle.selectDateContainer} onPress={() => setShowCalender(true)}>
+                                            <Text style={TaskStyle.selecteddueDate}>{dueDate.toLocaleDateString()}</Text>
+                                        </TouchableOpacity>
                                     </View>
-                                </TouchableOpacity>
-                                <Text style={[TaskStyle.LMHText, { marginLeft: windowWidth * 0.05 }]}>H</Text>
-                                <TouchableOpacity style={{ marginLeft: windowWidth * 0.008 }} onPress={() => setPriority("high")}>
-                                    <View style={TaskStyle.outerCircle}>
-                                        {priority == "high" ? <View style={[TaskStyle.innerCircle, { backgroundColor: '#FF3B30' }]}></View> : null}
+                                    {showCalender && <DateTimePicker
+                                        value={dueDate}
+                                        mode="date"
+                                        display="default"
+                                        onChange={onDueDateChange}
+                                        minimumDate={new Date()}
+                                    />}
+                                    <View style={TaskStyle.buttonContainer}>
+                                        <TouchableOpacity style={TaskStyle.button} onPress={() => {
+                                            setTaskTitle("");
+                                            setTaskDiscription("");
+                                            setPriority("");
+                                            setDueDate(new Date());
+                                            setVisible(false);
+                                        }}>
+                                            <Text style={TaskStyle.cancelCreateText}>Cancel</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={TaskStyle.button} onPress={() => handleCreate()}>
+                                            <Text style={TaskStyle.cancelCreateText}>Create</Text>
+                                        </TouchableOpacity>
                                     </View>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={TaskStyle.dueDateContainer}>
-                                <Text style={TaskStyle.deadLineText}>DeadLine</Text>
-                                <TouchableOpacity style={TaskStyle.selectDateContainer} onPress={() => setShowCalender(true)}>
-                                    <Text style={TaskStyle.selecteddueDate}>{dueDate.toLocaleDateString()}</Text>
-                                </TouchableOpacity>
-                            </View>
-                            {showCalender && <DateTimePicker
-                                value={dueDate}
-                                mode="date"
-                                display="default"
-                                onChange={onDueDateChange}
-                                minimumDate={new Date()}
-                            />}
-                            <View style={TaskStyle.buttonContainer}>
-                                <TouchableOpacity style={TaskStyle.button} onPress={() => {
-                                    setTaskTitle("");
-                                    setTaskDiscription("");
-                                    setPriority("");
-                                    setDueDate(new Date());
-                                    setVisible(false);
-                                }}>
-                                    <Text style={TaskStyle.cancelCreateText}>Cancel</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={TaskStyle.button} onPress={() => handleCreate()}>
-                                    <Text style={TaskStyle.cancelCreateText}>Create</Text>
-                                </TouchableOpacity>
-                            </View>
+                                </>
+                            )}
                         </View>
                     </View>
                 </Modal>
