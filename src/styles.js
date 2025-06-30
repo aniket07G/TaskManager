@@ -308,15 +308,52 @@ const TaskStyle = StyleSheet.create({
         height: windowHight * 0.08,
         alignItems: 'center',
         justifyContent: 'center',
-        borderTopRightRadius: windowWidth*1,
-        borderBottomLeftRadius: windowWidth*1,
-        gap: windowWidth*0.045
+        borderTopRightRadius: windowWidth * 1,
+        borderBottomLeftRadius: windowWidth * 1,
+        gap: windowWidth * 0.045
     },
     noTaskText: {
-        fontSize: windowWidth*0.06,
+        fontSize: windowWidth * 0.06,
         color: '#666666',
         fontFamily: 'Poppins-Medium',
         fontWeight: '500'
+    },
+    fullViewContainer: {
+        backgroundColor: '#F5F5F5',
+        width: windowWidth * 0.85,
+        // height: windowHight * 0.6,
+        borderRadius: windowWidth * 0.1,
+        borderWidth: 2,
+        borderColor: '#B0B0B0',
+        paddingHorizontal: windowWidth * 0.04,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: windowWidth*0.08
+    },
+    fullViewmodalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.7)', // simulates blur
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    fullViewTitle: {
+        fontFamily: 'Poppins-SemiBold',
+        fontSize: windowWidth*0.05,
+        color: '#333333',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    fullViewDescription: {
+        fontFamily: 'Poppins-Regular',
+        fontSize: windowWidth*0.04,
+        color: '#555555',
+        textAlign: 'center',
+        lineHeight: 24,
+    },
+    crossContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: windowHight*0.015
     }
 });
 

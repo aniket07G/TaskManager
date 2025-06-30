@@ -14,6 +14,7 @@ import MoreIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import EditIcon from 'react-native-vector-icons/Entypo';
 import DeleteIcon from 'react-native-vector-icons/MaterialIcons';
 import MarkIcon from 'react-native-vector-icons/MaterialIcons';
+import CrossIcon from 'react-native-vector-icons/Entypo';
 
 
 const windowWidth = Dimensions.get('window').width;
@@ -41,6 +42,8 @@ const Task = () => {
     const [uid, setUid] = useState(null);
     const [creatingLoading, setCreatingLoading] = useState(false);
     const [firstLoading, setFirstLoading] = useState(true);
+    const [isFullView, setFullView] = useState(false);
+    const [taskInFull, setTaskInFull] = useState({});
 
     const onDueDateChange = (event, selectedDate) => {
         setShowCalender(false);
@@ -167,6 +170,7 @@ const Task = () => {
         setTaskTitle(task.title);
         setTaskDiscription(task.description);
         setPriority(task.priority);
+        setDueDate(new Date(task.dueDate));
         setVisible(true);
     }
 
@@ -275,9 +279,15 @@ const Task = () => {
                                             renderItem={({ item }) => (
                                                 <View style={[TaskStyle.taskContainer, { opacity: item.isComplete ? 0.6 : 1 }]} >
                                                     <View style={TaskStyle.leftTaskC}>
-                                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#4CAF50"} />
                                                     </View>
-                                                    <View style={TaskStyle.middleTaskC}>
+                                                    <TouchableOpacity 
+                                                    style={TaskStyle.middleTaskC} 
+                                                    disabled={item.isComplete && showMore && item.id === morekey}
+                                                    onPress={() => {
+                                                        setTaskInFull(item);
+                                                        setFullView(true);
+                                                    }}>
                                                         {showMore && item.id === morekey ? (
                                                             <>
                                                                 <View style={TaskStyle.showMoreConainer}>
@@ -290,7 +300,7 @@ const Task = () => {
                                                                     <TouchableOpacity
                                                                         disabled={item.isComplete}
                                                                         onPress={() => editTask(item)}>
-                                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#B0B0B0"} />
                                                                     </TouchableOpacity>
                                                                     <TouchableOpacity
                                                                         disabled={item.isComplete}
@@ -298,7 +308,7 @@ const Task = () => {
                                                                             setDoesComeFromEdit(item);
                                                                             markTask(item);
                                                                         }}>
-                                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#4CAF50"} />
                                                                     </TouchableOpacity>
                                                                 </View>
                                                             </>) : (
@@ -317,7 +327,7 @@ const Task = () => {
                                                                 </Text>
                                                             </>
                                                         )}
-                                                    </View>
+                                                    </TouchableOpacity>
                                                     <View style={TaskStyle.rightTaskC}>
                                                         <Text
                                                             style={[TaskStyle.priorityText,
@@ -350,9 +360,15 @@ const Task = () => {
                                             renderItem={({ item }) => (
                                                 <View style={[TaskStyle.taskContainer, { opacity: item.isComplete ? 0.6 : 1 }]}>
                                                     <View style={TaskStyle.leftTaskC}>
-                                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#4CAF50"} />
                                                     </View>
-                                                    <View style={TaskStyle.middleTaskC}>
+                                                    <TouchableOpacity 
+                                                    style={TaskStyle.middleTaskC} 
+                                                    disabled={item.isComplete && showMore && item.id === morekey}
+                                                    onPress={() => {
+                                                        setTaskInFull(item);
+                                                        setFullView(true);
+                                                    }}>
                                                         {showMore && item.id === morekey ? (
                                                             <>
                                                                 <View style={TaskStyle.showMoreConainer}>
@@ -365,7 +381,7 @@ const Task = () => {
                                                                     <TouchableOpacity
                                                                         disabled={item.isComplete}
                                                                         onPress={() => editTask(item)}>
-                                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#B0B0B0"} />
                                                                     </TouchableOpacity>
                                                                     <TouchableOpacity
                                                                         disabled={item.isComplete}
@@ -373,7 +389,7 @@ const Task = () => {
                                                                             setDoesComeFromEdit(item);
                                                                             markTask(item);
                                                                         }}>
-                                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#4CAF50"} />
                                                                     </TouchableOpacity>
                                                                 </View>
                                                             </>) : (
@@ -392,7 +408,7 @@ const Task = () => {
                                                                 </Text>
                                                             </>
                                                         )}
-                                                    </View>
+                                                    </TouchableOpacity>
                                                     <View style={TaskStyle.rightTaskC}>
                                                         <Text
                                                             style={[TaskStyle.priorityText,
@@ -428,9 +444,15 @@ const Task = () => {
                                             renderItem={({ item }) => (
                                                 <View style={[TaskStyle.taskContainer, { opacity: item.isComplete ? 0.6 : 1 }]}>
                                                     <View style={TaskStyle.leftTaskC}>
-                                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                        <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#4CAF50"} />
                                                     </View>
-                                                    <View style={TaskStyle.middleTaskC}>
+                                                    <TouchableOpacity 
+                                                    style={TaskStyle.middleTaskC}
+                                                    disabled={item.isComplete && showMore && item.id === morekey}
+                                                    onPress={() => {
+                                                        setTaskInFull(item);
+                                                        setFullView(true);
+                                                    }}>
                                                         {showMore && item.id === morekey ? (
                                                             <>
                                                                 <View style={TaskStyle.showMoreConainer}>
@@ -443,7 +465,7 @@ const Task = () => {
                                                                     <TouchableOpacity
                                                                         disabled={item.isComplete}
                                                                         onPress={() => editTask(item)}>
-                                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                        <EditIcon name="edit" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#B0B0B0"} />
                                                                     </TouchableOpacity>
                                                                     <TouchableOpacity
                                                                         disabled={item.isComplete}
@@ -451,7 +473,7 @@ const Task = () => {
                                                                             setDoesComeFromEdit(item);
                                                                             markTask(item);
                                                                         }}>
-                                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={"#4A90E2"} />
+                                                                        <MarkIcon name="check-circle" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#4CAF50"} />
                                                                     </TouchableOpacity>
                                                                 </View>
                                                             </>) : (
@@ -470,7 +492,7 @@ const Task = () => {
                                                                 </Text>
                                                             </>
                                                         )}
-                                                    </View>
+                                                    </TouchableOpacity>
                                                     <View style={TaskStyle.rightTaskC}>
                                                         <Text
                                                             style={[TaskStyle.priorityText,
@@ -578,6 +600,24 @@ const Task = () => {
                                     </View>
                                 </>
                             )}
+                        </View>
+                    </View>
+                </Modal>
+                <Modal
+                    visible={isFullView}
+                    animationType="fade"
+                    transparent={true}
+                >
+                    <View style={TaskStyle.fullViewmodalContainer}>
+                        <View style={TaskStyle.fullViewContainer}>
+                            <Text style={TaskStyle.fullViewTitle}>{taskInFull.title}</Text>
+                            <Text style={TaskStyle.fullViewDescription}>{taskInFull.description}</Text>
+                            <TouchableOpacity style={TaskStyle.crossContainer} onPress={() => {
+                                setTaskInFull({});
+                                setFullView(false);
+                            }}>
+                                <CrossIcon name="circle-with-cross" size={windowWidth * 0.08} color={"#333333"} />
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </Modal>
