@@ -15,6 +15,7 @@ import EditIcon from 'react-native-vector-icons/Entypo';
 import DeleteIcon from 'react-native-vector-icons/MaterialIcons';
 import MarkIcon from 'react-native-vector-icons/MaterialIcons';
 import CrossIcon from 'react-native-vector-icons/Entypo';
+import { createNotificationChannel, scheduleNotification, cancelNotification } from "../notification";
 
 
 const windowWidth = Dimensions.get('window').width;
@@ -79,6 +80,13 @@ const Task = () => {
                 .set({ tasks: TasksGlobal });
 
             setVisible(false);
+            scheduleNotification(taskToBeSaved.id, taskToBeSaved.title)
+                .then(() => {
+                    console.log("Notification scheduled successfully!");
+                })
+                .catch(error => {
+                    console.error("Failed to schedule notification:", error);
+                });
             setTimeout(() => {
                 sortBasedonToday(TasksGlobal);
                 sortBasedonTomorrow(TasksGlobal);
@@ -158,6 +166,11 @@ const Task = () => {
                     filtering(filterParameter);
                 }, 0);
             }
+            cancelNotification(taskToBeDeleted.id).then(()=>{
+                console.log("Notification gets cancelled");
+            }).catch(()=>{
+                console.log("Getting error while cancelling");
+            });
 
         } catch (e) {
             console.log(e);
@@ -189,6 +202,11 @@ const Task = () => {
                 filtering(filterParameter);
                 setDoesComeFromEdit(null);
             }, 0);
+            cancelNotification(taskToBeDeleted.id).then(()=>{
+                console.log("Notification gets cancelled");
+            }).catch(()=>{
+                console.log("Getting error while cancelling");
+            });
         } catch (e) {
             console.log(e);
             setDoesComeFromEdit(null);
@@ -202,6 +220,7 @@ const Task = () => {
                 .doc(uid)
                 .get();
 
+            console.log("From cache?", docSnap.metadata.fromCache);
             if (docSnap.exists && docSnap.data().tasks) {
                 TasksGlobal = JSON.parse(JSON.stringify(docSnap.data().tasks));
                 console.log("Fetched Data", docSnap.data().tasks);
@@ -219,6 +238,7 @@ const Task = () => {
     }
 
     useEffect(() => {
+        createNotificationChannel();
         const user = auth().currentUser;
         if (user && user.uid) {
             setUid(user.uid);
@@ -251,7 +271,11 @@ const Task = () => {
                         <SearchIcon name="search" style={TaskStyle.searchIcon} size={windowWidth * 0.12} color={"#FFFFFF"} />
                     </View>
                     <View style={TaskStyle.right}>
-                        <TouchableOpacity style={TaskStyle.plusContainer} onPress={() => setVisible(true)}>
+                        <TouchableOpacity
+                            style={TaskStyle.plusContainer}
+                            onPress={() => {
+                                setVisible(true)
+                            }}>
                             <PlusIcon name="plus-circle" size={windowWidth * 0.08} color={"#FFFFFF"} />
                         </TouchableOpacity>
                     </View>
@@ -281,13 +305,13 @@ const Task = () => {
                                                     <View style={TaskStyle.leftTaskC}>
                                                         <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#4CAF50"} />
                                                     </View>
-                                                    <TouchableOpacity 
-                                                    style={TaskStyle.middleTaskC} 
-                                                    disabled={item.isComplete && showMore && item.id === morekey}
-                                                    onPress={() => {
-                                                        setTaskInFull(item);
-                                                        setFullView(true);
-                                                    }}>
+                                                    <TouchableOpacity
+                                                        style={TaskStyle.middleTaskC}
+                                                        disabled={item.isComplete && showMore && item.id === morekey}
+                                                        onPress={() => {
+                                                            setTaskInFull(item);
+                                                            setFullView(true);
+                                                        }}>
                                                         {showMore && item.id === morekey ? (
                                                             <>
                                                                 <View style={TaskStyle.showMoreConainer}>
@@ -336,10 +360,10 @@ const Task = () => {
                                                         <Text style={TaskStyle.dueText}>{item.dueDate}</Text>
                                                     </View>
                                                     <TouchableOpacity style={TaskStyle.moreContainer} onPress={() => {
-                                                        if (!showMore) {
+                                                        if (!showMore || morekey!==item.id) {
                                                             setShowMore(true);
                                                             setMoreKey(item.id);
-                                                        } else {
+                                                        } else if(morekey===item.id){
                                                             setShowMore(false);
                                                             setMoreKey("");
                                                         }
@@ -362,13 +386,13 @@ const Task = () => {
                                                     <View style={TaskStyle.leftTaskC}>
                                                         <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#4CAF50"} />
                                                     </View>
-                                                    <TouchableOpacity 
-                                                    style={TaskStyle.middleTaskC} 
-                                                    disabled={item.isComplete && showMore && item.id === morekey}
-                                                    onPress={() => {
-                                                        setTaskInFull(item);
-                                                        setFullView(true);
-                                                    }}>
+                                                    <TouchableOpacity
+                                                        style={TaskStyle.middleTaskC}
+                                                        disabled={item.isComplete && showMore && item.id === morekey}
+                                                        onPress={() => {
+                                                            setTaskInFull(item);
+                                                            setFullView(true);
+                                                        }}>
                                                         {showMore && item.id === morekey ? (
                                                             <>
                                                                 <View style={TaskStyle.showMoreConainer}>
@@ -417,10 +441,10 @@ const Task = () => {
                                                         <Text style={TaskStyle.dueText}>{item.dueDate}</Text>
                                                     </View>
                                                     <TouchableOpacity style={TaskStyle.moreContainer} onPress={() => {
-                                                        if (!showMore) {
+                                                        if (!showMore || morekey!==item.id) {
                                                             setShowMore(true);
                                                             setMoreKey(item.id);
-                                                        } else {
+                                                        } else if(morekey===item.id){
                                                             setShowMore(false);
                                                             setMoreKey("");
                                                         }
@@ -446,13 +470,13 @@ const Task = () => {
                                                     <View style={TaskStyle.leftTaskC}>
                                                         <TaskIcon name="clipboard-list" size={windowWidth * 0.08} color={!item.isComplete ? "#4A90E2" : "#4CAF50"} />
                                                     </View>
-                                                    <TouchableOpacity 
-                                                    style={TaskStyle.middleTaskC}
-                                                    disabled={item.isComplete && showMore && item.id === morekey}
-                                                    onPress={() => {
-                                                        setTaskInFull(item);
-                                                        setFullView(true);
-                                                    }}>
+                                                    <TouchableOpacity
+                                                        style={TaskStyle.middleTaskC}
+                                                        disabled={item.isComplete && showMore && item.id === morekey}
+                                                        onPress={() => {
+                                                            setTaskInFull(item);
+                                                            setFullView(true);
+                                                        }}>
                                                         {showMore && item.id === morekey ? (
                                                             <>
                                                                 <View style={TaskStyle.showMoreConainer}>
@@ -501,10 +525,10 @@ const Task = () => {
                                                         <Text style={TaskStyle.dueText}>{item.dueDate}</Text>
                                                     </View>
                                                     <TouchableOpacity style={TaskStyle.moreContainer} onPress={() => {
-                                                        if (!showMore) {
+                                                        if (!showMore || morekey!==item.id) {
                                                             setShowMore(true);
                                                             setMoreKey(item.id);
-                                                        } else {
+                                                        } else if(morekey===item.id){
                                                             setShowMore(false);
                                                             setMoreKey("");
                                                         }

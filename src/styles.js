@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, Dimensions, Platform } from "react-native";
 
 const windowHight = Dimensions.get('window').height;
 const windowWidth = Dimensions.get('window').width;
@@ -106,24 +106,21 @@ const TaskStyle = StyleSheet.create({
     },
     middleTaskC: {
         flex: 2,
-        // backgroundColor: 'orange',
-        // justifyContent: 'center',
+        justifyContent: 'center',
     },
     rightTaskC: {
         flex: 0.6,
-        // backgroundColor: 'pink',
         justifyContent: 'center',
         alignItems: 'center'
     },
     titleText: {
         fontSize: windowWidth * 0.045,
         fontFamily: 'Poppins-Medium',
-        marginTop: windowHight * 0.01
     },
     discriptionText: {
         fontSize: windowWidth * 0.025,
         fontFamily: 'Poppins-Light',
-        marginTop: -windowHight * 0.008
+        marginTop: -windowHight * 0.008,
     },
     priorityText: {
         fontSize: windowWidth * 0.05,
@@ -182,8 +179,9 @@ const TaskStyle = StyleSheet.create({
         color: '#333',
         borderColor: '#CCC',
         backgroundColor: '#F5F5F5',
-        paddingHorizontal: windowWidth * 0.03
-
+        paddingHorizontal: windowWidth * 0.03,
+        textAlignVertical: 'center', // fixes Android vertical alignment
+        paddingVertical: Platform.OS === 'android' ? 0 : 6,
     },
     titleTextModal: {
         // marginTop: windowHight * 0.05,
@@ -328,7 +326,7 @@ const TaskStyle = StyleSheet.create({
         paddingHorizontal: windowWidth * 0.04,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: windowWidth*0.08
+        paddingVertical: windowWidth * 0.08
     },
     fullViewmodalContainer: {
         flex: 1,
@@ -338,14 +336,14 @@ const TaskStyle = StyleSheet.create({
     },
     fullViewTitle: {
         fontFamily: 'Poppins-SemiBold',
-        fontSize: windowWidth*0.05,
+        fontSize: windowWidth * 0.05,
         color: '#333333',
         marginBottom: 8,
         textAlign: 'center',
     },
     fullViewDescription: {
         fontFamily: 'Poppins-Regular',
-        fontSize: windowWidth*0.04,
+        fontSize: windowWidth * 0.04,
         color: '#555555',
         textAlign: 'center',
         lineHeight: 24,
@@ -353,7 +351,7 @@ const TaskStyle = StyleSheet.create({
     crossContainer: {
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: windowHight*0.015
+        marginTop: windowHight * 0.015
     }
 });
 
