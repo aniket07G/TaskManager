@@ -629,7 +629,7 @@ adb devices
 ```
 # ⬇️ Download & Try the App
 
-You can try out the Sudoku app by downloading the APK from the link below:
+You can try out the TaskManager app by downloading the APK from the link below:
 
 👉 [Download TaskManager APK](https://drive.google.com/file/d/1zsmTFFaA_MmuPyfCQj43EryRi8YBwdea/view?usp=sharing)
 
