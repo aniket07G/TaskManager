@@ -14,24 +14,24 @@ Designed for simplicity, speed, and productivity — all in one place.
 # 🖼️ Screenshots
 
 <p align="center">
-  <img src="https://i.ibb.co/SXGxdHCM/16.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/mpn7VDC/17.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/KxMTzP7H/18.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/Wp76T02f/1.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/Y49QVRw1/2.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/XrmYhM6Q/3.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/zVRZtwcz/4.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/S4VdC9fn/5.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/JWSXFz3V/6.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/n8L04J9y/7.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/TBHgt2g7/8.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/ymZ1v9sC/9.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/QF6GQJdY/10.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/mC81GvDj/11.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/svLKS9MW/12.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/J66KvRD/13.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/9HwTmyhS/14.jpg" width="280" style="margin: 10px;" />
-  <img src="https://i.ibb.co/fzFCFMgv/15.jpg" width="280" style="margin: 10px;" />
+  <img src="./assets/screenshots/16.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/17.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/18.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/1.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/2.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/3.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/4.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/5.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/6.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/7.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/8.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/9.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/10.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/11.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/12.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/13.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/14.jpg" width="270" style="margin: 10px;" />
+  <img src="./assets/screenshots/15.jpg" width="270" style="margin: 10px;" />
 </p>
 
 # 🚀 Setup Instructions
@@ -627,12 +627,13 @@ Ensure your Android device or emulator is running and detected using:
 adb devices
 
 ```
+# ⬇️ Download & Try the App
 
-  
+You can try out the Sudoku app by downloading the APK from the link below:
+
+👉 [Download TaskManager APK](https://drive.google.com/file/d/1zsmTFFaA_MmuPyfCQj43EryRi8YBwdea/view?usp=sharing)
 
 ---
-
-  
 
 ✅ **App is Now Running!** 🎉
 
